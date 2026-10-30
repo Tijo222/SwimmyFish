@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swimmy Fish - Vibrant Mola Mola Dash</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700;800&family=Outfit:wght@400;600;800&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .font-game {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Bright glassmorphism panels with colorful glows */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 2px solid rgba(56, 189, 248, 0.4);
+            box-shadow: 0 12px 40px rgba(14, 165, 233, 0.25);
+        }
+
+        .rainbow-text {
+            background: linear-gradient(135deg, #f43f5e, #fb923c, #facc15, #4ade80, #38bdf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Floating bounce keyframe */
+        @keyframes float-fun {
+            0%, 100% { transform: translateY(0px) rotate(-2deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+        .animate-float-fun {
+            animation: float-fun 2.8s infinite ease-in-out;
+        }
+
+        canvas {
+            box-shadow: 0 20px 60px rgba(3, 105, 161, 0.5);
+            border-radius: 24px;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 overflow-hidden select-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-900 via-slate-950 to-indigo-950">
+
+    <!-- Top Navigation / Title -->
+    <header class="w-full max-w-4xl flex items-center justify-between mb-3 px-3">
+        <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 via-purple-500 to-cyan-400 p-0.5 shadow-lg shadow-pink-500/30 animate-pulse">
+                <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-cyan-300 text-2xl">
+                    <i class="fa-solid fa-fish-fins"></i>
+                </div>
+            </div>
+            <div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-wide font-game rainbow-text drop-shadow">
+                    SWIMMY FISH
+                </h1>
+                <p class="text-xs sm:text-sm text-cyan-300 font-semibold tracking-wider flex items-center gap-1.5">
+                    <span class="bg-pink-500/30 text-pink-300 text-[10px] px-2 py-0.5 rounded-full border border-pink-400/40">BACKWARD SWIMMER</span>
+                    Mola Mola Reef Dash
+                </p>
+            </div>
+        </div>
+
+        <!-- Mute Audio Toggle -->
+        <button id="soundToggle" class="glass-panel px-4 py-2.5 rounded-2xl text-xs font-extrabold text-cyan-300 hover:text-white hover:border-cyan-300 transition-all flex items-center gap-2 hover:scale-105 active:scale-95">
+            <i id="soundIcon" class="fa-solid fa-volume-high text-cyan-400 text-base"></i>
+            <span id="soundLabel" class="hidden sm:inline font-game tracking-wider">SOUND ON</span>
+        </button>
+    </header>
+
+    <!-- Main Game Frame Wrapper -->
+    <div class="relative w-full max-w-4xl aspect-[4/3] max-h-[78vh] flex items-center justify-center">
+        
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas" class="w-full h-full object-contain bg-slate-900 border-2 border-cyan-400/40"></canvas>
+
+        <!-- START / OVERLAY SCREEN -->
+        <div id="startOverlay" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-20">
+            <div class="glass-panel max-w-md w-full p-8 rounded-3xl flex flex-col items-center space-y-5 animate-float-fun">
+                
+                <!-- Vibrant Mola Mola Avatar Graphic (Facing Right / Swimming Backwards) -->
+                <div class="relative w-28 h-28 mb-1">
+                    <div class="absolute inset-0 bg-gradient-to-r from-pink-500 to-cyan-400 rounded-full blur-2xl opacity-60 animate-pulse"></div>
+                    <svg viewBox="0 0 300 240" class="w-full h-full drop-shadow-[0_0_20px_rgba(236,72,153,0.7)]">
+                        <g transform="translate(300, 0) scale(-1, 1)">
+                            <!-- Top Fin -->
+                            <path d="M110 90 Q120 10, 160 5 C175 2, 170 30, 150 95 Z" fill="#ec4899"/>
+                            <!-- Bottom Fin -->
+                            <path d="M110 150 Q120 230, 160 235 C175 238, 170 210, 150 145 Z" fill="#38bdf8"/>
+                            <!-- Body -->
+                            <path d="M220 120 C220 185, 130 195, 70 160 C30 135, 30 105, 70 80 C130 45, 220 55, 220 120 Z" fill="#f43f5e"/>
+                            <!-- Tail Rim -->
+                            <path d="M220 70 Q245 120, 220 170 Q205 120, 220 70 Z" fill="#fb923c"/>
+                            <!-- Eye -->
+                            <circle cx="65" cy="105" r="11" fill="#0f172a"/>
+                            <circle cx="65" cy="105" r="9" fill="#38bdf8"/>
+                            <circle cx="63" cy="103" r="3" fill="#ffffff"/>
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="space-y-1">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold font-game rainbow-text">READY TO SWAP &amp; DASH?</h2>
+                    <p class="text-xs text-cyan-200/90 font-medium leading-relaxed">
+                        Mola Mola is swimming <strong class="text-amber-300">BACKWARDS</strong>! Guide him safely through colorful neon reef mines.
+                    </p>
+                </div>
+
+                <!-- Controls Badge -->
+                <div class="flex items-center gap-2 bg-slate-900/90 border border-pink-500/40 px-4 py-2.5 rounded-2xl text-xs text-pink-300 font-semibold">
+                    <span class="bg-pink-500/20 text-pink-200 px-2.5 py-1 rounded-lg font-mono font-bold border border-pink-400/30">SPACEBAR</span>
+                    <span>OR</span>
+                    <span class="bg-cyan-500/20 text-cyan-200 px-2.5 py-1 rounded-lg font-mono font-bold border border-cyan-400/30">CLICK / TAP</span>
+                </div>
+
+                <button id="startBtn" class="w-full py-4 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-400 hover:from-pink-400 hover:to-cyan-300 text-white font-extrabold font-game text-xl rounded-2xl shadow-lg shadow-pink-500/40 hover:shadow-cyan-400/60 hover:scale-[1.03] active:scale-[0.97] transition-all tracking-wider">
+                    LET'S SWIM!
+                </button>
+            </div>
+        </div>
+
+        <!-- GAME OVER OVERLAY SCREEN -->
+        <div id="gameOverOverlay" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-20 hidden">
+            <div class="glass-panel max-w-md w-full p-8 rounded-3xl flex flex-col items-center space-y-6">
+                
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-pink-500 to-rose-600 p-0.5 shadow-xl shadow-rose-500/40 animate-bounce">
+                    <div class="w-full h-full bg-slate-950 rounded-[22px] flex items-center justify-center text-pink-400 text-4xl">
+                        <i class="fa-solid fa-burst"></i>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold font-game text-rose-400">BOOM! MINE HIT!</h2>
+                    <p class="text-xs text-slate-300">Watch out for those spiked sea mines next time!</p>
+                </div>
+
+                <!-- Score Board -->
+                <div class="w-full grid grid-cols-2 gap-4 bg-slate-900/90 border border-cyan-400/30 p-4 rounded-2xl">
+                    <div class="text-center">
+                        <span class="text-[11px] uppercase font-bold text-cyan-300 tracking-wider">Score</span>
+                        <div id="finalScore" class="text-4xl font-extrabold font-game text-cyan-300">0</div>
+                    </div>
+                    <div class="text-center border-l border-slate-700">
+                        <span class="text-[11px] uppercase font-bold text-amber-400 tracking-wider">Best Score</span>
+                        <div id="bestScore" class="text-4xl font-extrabold font-game text-amber-400">0</div>
+                    </div>
+                </div>
+
+                <button id="restartBtn" class="w-full py-4 bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 hover:from-cyan-300 hover:to-indigo-400 text-slate-950 font-extrabold font-game text-xl rounded-2xl shadow-lg shadow-cyan-400/40 hover:scale-[1.03] active:scale-[0.97] transition-all tracking-wider">
+                    PLAY AGAIN
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Gameplay Footer Controls Tip -->
+    <footer class="w-full max-w-4xl mt-3 flex justify-between items-center text-xs text-cyan-200/80 px-3 font-medium">
+        <span class="flex items-center gap-2"><i class="fa-solid fa-gamepad text-pink-400 text-sm"></i> Press Space, Click, or Tap screen to propel upwards</span>
+        <span id="fpsCounter" class="font-mono text-cyan-400/60">60 FPS</span>
+    </footer>
+
+    <!-- Game Engine Script -->
+    <script>
+        // High-Quality Vibrant SVG Sprite Generator
+        const AssetFactory = {
+            // Bright Colorful Mola Mola Sunfish (Flipped to face right / swimming backwards)
+            createMolaMolaPNG: () => {
+                const svg = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 240" width="300" height="240">
+                    <defs>
+                        <!-- Vibrant Pink & Coral Body Gradient -->
+                        <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#f43f5e"/>
+                            <stop offset="40%" stop-color="#ec4899"/>
+                            <stop offset="80%" stop-color="#a855f7"/>
+                            <stop offset="100%" stop-color="#6366f1"/>
+                        </linearGradient>
+
+                        <!-- Top & Bottom Fin Gradients -->
+                        <linearGradient id="topFinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#fb7185"/>
+                            <stop offset="100%" stop-color="#e11d48"/>
+                        </linearGradient>
+
+                        <linearGradient id="bottomFinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#38bdf8"/>
+                            <stop offset="100%" stop-color="#0284c7"/>
+                        </linearGradient>
+
+                        <!-- Clavus Tail Gradient -->
+                        <linearGradient id="tailGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#facc15"/>
+                            <stop offset="100%" stop-color="#f97316"/>
+                        </linearGradient>
+
+                        <radialGradient id="eyeGrad" cx="35%" cy="35%" r="65%">
+                            <stop offset="0%" stop-color="#38bdf8"/>
+                            <stop offset="40%" stop-color="#0284c7"/>
+                            <stop offset="100%" stop-color="#0f172a"/>
+                        </radialGradient>
+
+                        <filter id="molaGlow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#ec4899" flood-opacity="0.5"/>
+                        </filter>
+                    </defs>
+
+                    <!-- FLIPPED HORIZONTALLY SO THE FISH FACES RIGHT AND SWIMS BACKWARDS -->
+                    <g filter="url(#molaGlow)" transform="translate(300, 0) scale(-1, 1)">
+                        <!-- Top Dorsal Fin -->
+                        <path d="M110 90 Q120 10, 160 5 C175 2, 170 30, 150 95 Z" fill="url(#topFinGrad)" stroke="#881337" stroke-width="3"/>
+                        <path d="M125 70 Q135 25, 152 18" stroke="#ffe4e6" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.8"/>
+
+                        <!-- Bottom Anal Fin -->
+                        <path d="M110 150 Q120 230, 160 235 C175 238, 170 210, 150 145 Z" fill="url(#bottomFinGrad)" stroke="#0c4a6e" stroke-width="3"/>
+                        <path d="M125 170 Q135 215, 152 222" stroke="#e0f2fe" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.8"/>
+
+                        <!-- Clavus (Truncated Tail Rim) -->
+                        <path d="M220 70 Q248 120, 220 170 Q200 120, 220 70 Z" fill="url(#tailGrad)" stroke="#7c2d12" stroke-width="3"/>
+
+                        <!-- Main Body -->
+                        <path d="M220 120 C220 185, 130 195, 70 160 C30 135, 30 105, 70 80 C130 45, 220 55, 220 120 Z" fill="url(#bodyGrad)" stroke="#4c1d95" stroke-width="4"/>
+
+                        <!-- Playful Polka Spots / Highlights -->
+                        <circle cx="110" cy="100" r="10" fill="#ffffff" opacity="0.25"/>
+                        <circle cx="150" cy="130" r="14" fill="#ffffff" opacity="0.2"/>
+                        <circle cx="125" cy="155" r="8" fill="#ffffff" opacity="0.3"/>
+                        <circle cx="170" cy="95" r="12" fill="#ffffff" opacity="0.18"/>
+
+                        <!-- Cute Pectoral Fin -->
+                        <path d="M105 120 Q128 110, 132 128 Q120 138, 105 120 Z" fill="#facc15" stroke="#713f12" stroke-width="2"/>
+
+                        <!-- Large Friendly Eye -->
+                        <circle cx="65" cy="105" r="13" fill="#ffffff"/>
+                        <circle cx="65" cy="105" r="9" fill="url(#eyeGrad)"/>
+                        <circle cx="62" cy="102" r="3.5" fill="#ffffff"/>
+                        <circle cx="68" cy="108" r="1.5" fill="#ffffff" opacity="0.8"/>
+
+                        <!-- Cute Pouty Lips -->
+                        <path d="M35 118 C26 118, 22 123, 33 127 C42 130, 43 120, 35 118 Z" fill="#fb7185" stroke="#881337" stroke-width="2"/>
+                    </g>
+                </svg>`;
+                return "data:image/svg+xml;base64," + btoa(svg);
+            },
+
+            // Colorful Spiked Coral Reef Sea Mine
+            createSeaMinePNG: () => {
+                const svg = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+                    <defs>
+                        <radialGradient id="mineSphere" cx="35%" cy="35%" r="65%">
+                            <stop offset="0%" stop-color="#a855f7"/>
+                            <stop offset="50%" stop-color="#6b21a8"/>
+                            <stop offset="85%" stop-color="#3b0764"/>
+                            <stop offset="100%" stop-color="#1e1b4b"/>
+                        </radialGradient>
+
+                        <linearGradient id="spikeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#f43f5e"/>
+                            <stop offset="100%" stop-color="#881337"/>
+                        </linearGradient>
+
+                        <radialGradient id="neonGlow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#facc15"/>
+                            <stop offset="50%" stop-color="#eab308"/>
+                            <stop offset="100%" stop-color="#ca8a04"/>
+                        </radialGradient>
+                    </defs>
+
+                    <g>
+                        <!-- Colorful Spikes -->
+                        <path d="M92 38 L100 2 L108 38 Z" fill="url(#spikeGrad)" stroke="#fda4af" stroke-width="1.5"/>
+                        <path d="M92 162 L100 198 L108 162 Z" fill="url(#spikeGrad)" stroke="#fda4af" stroke-width="1.5"/>
+                        <path d="M38 92 L2 100 L38 108 Z" fill="url(#spikeGrad)" stroke="#fda4af" stroke-width="1.5"/>
+                        <path d="M162 92 L198 100 L162 108 Z" fill="url(#spikeGrad)" stroke="#fda4af" stroke-width="1.5"/>
+
+                        <path d="M50 50 L20 20 L60 60 Z" fill="url(#spikeGrad)" stroke="#fda4af" stroke-width="1.5"/>
+                        <path d="M150 50 L180 20 L140 60 Z" fill="url(#spikeGrad)" stroke="#fda4af" stroke-width="1.5"/>
+                        <path d="M50 150 L20 180 L60 140 Z" fill="url(#spikeGrad)" stroke="#fda4af" stroke-width="1.5"/>
+                        <path d="M150 150 L180 180 L140 140 Z" fill="url(#spikeGrad)" stroke="#fda4af" stroke-width="1.5"/>
+
+                        <!-- Mine Sphere -->
+                        <circle cx="100" cy="100" r="62" fill="url(#mineSphere)" stroke="#c084fc" stroke-width="3.5"/>
+
+                        <!-- Bright Rivets -->
+                        <circle cx="70" cy="70" r="4" fill="#38bdf8"/>
+                        <circle cx="130" cy="70" r="4" fill="#38bdf8"/>
+                        <circle cx="70" cy="130" r="4" fill="#38bdf8"/>
+                        <circle cx="130" cy="130" r="4" fill="#38bdf8"/>
+
+                        <!-- Center Glowing Light -->
+                        <circle cx="100" cy="100" r="14" fill="url(#neonGlow)" stroke="#fef08a" stroke-width="2"/>
+                        <circle cx="97" cy="97" r="4" fill="#ffffff"/>
+                    </g>
+                </svg>`;
+                return "data:image/svg+xml;base64," + btoa(svg);
+            }
+        };
+
+        // Audio Engine
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+            }
+
+            playSwim() {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(480, this.ctx.currentTime + 0.14);
+                    
+                    gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.14);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.14);
+                } catch(e) {}
+            }
+
+            playScore() {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(587.33, this.ctx.currentTime); // D5
+                    osc.frequency.setValueAtTime(880.00, this.ctx.currentTime + 0.1); // A5
+
+                    gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.3);
+                } catch(e) {}
+            }
+
+            playExplosion() {
+                if (!this.enabled || !this.ctx) return;
+                try {
+                    const bufferSize = this.ctx.sampleRate * 0.45;
+                    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = buffer;
+
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(900, this.ctx.currentTime);
+                    filter.frequency.linearRampToValueAtTime(40, this.ctx.currentTime + 0.45);
+
+                    const gain = this.ctx.createGain();
+                    gain.gain.setValueAtTime(0.6, this.ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.45);
+
+                    noise.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    noise.start();
+                    noise.stop(this.ctx.currentTime + 0.45);
+                } catch(e) {}
+            }
+        }
+
+        // Main Game Application
+        class SwimmyFishGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+
+                this.width = 960;
+                this.height = 720;
+                this.canvas.width = this.width;
+                this.canvas.height = this.height;
+
+                this.state = 'START';
+                this.score = 0;
+                this.highScore = parseInt(localStorage.getItem('swimmy_mola_vibrant_hs') || '0');
+
+                this.sound = new SoundEngine();
+
+                this.molaImg = new Image();
+                this.molaImg.src = AssetFactory.createMolaMolaPNG();
+
+                this.mineImg = new Image();
+                this.mineImg.src = AssetFactory.createSeaMinePNG();
+
+                // Mola Mola position & physics
+                this.mola = {
+                    x: 180,
+                    y: 320,
+                    width: 82,
+                    height: 66,
+                    velocity: 0,
+                    gravity: 0.38,
+                    swimPower: -8.4,
+                    rotation: 0
+                };
+
+                this.mines = [];
+                this.mineWidth = 75;
+                this.mineGap = 215;
+                this.mineSpeed = 3.4;
+                this.spawnTimer = 0;
+                this.spawnInterval = 105;
+
+                // Visual FX
+                this.bubbles = [];
+                this.initBubbles();
+
+                this.particles = [];
+                this.scorePopups = [];
+
+                this.lastTime = performance.now();
+                this.fps = 60;
+
+                this.setupControls();
+                this.updateUI();
+                
+                requestAnimationFrame(this.loop.bind(this));
+            }
+
+            initBubbles() {
+                this.bubbles = [];
+                for (let i = 0; i < 45; i++) {
+                    this.bubbles.push({
+                        x: Math.random() * this.width,
+                        y: Math.random() * this.height,
+                        radius: Math.random() * 4 + 1.5,
+                        speed: Math.random() * 1.8 + 0.6,
+                        opacity: Math.random() * 0.6 + 0.2,
+                        color: ['#e0f2fe', '#fbcfe8', '#fef08a', '#c084fc'][Math.floor(Math.random() * 4)]
+                    });
+                }
+            }
+
+            setupControls() {
+                const triggerSwim = () => {
+                    this.sound.init();
+                    if (this.state === 'START') {
+                        this.startGame();
+                    } else if (this.state === 'PLAYING') {
+                        this.mola.velocity = this.mola.swimPower;
+                        this.sound.playSwim();
+
+                        // Add colorful swim trail bubbles
+                        for (let i = 0; i < 6; i++) {
+                            this.particles.push({
+                                x: this.mola.x + this.mola.width / 2,
+                                y: this.mola.y + this.mola.height - 10,
+                                vx: (Math.random() - 0.5) * 3,
+                                vy: Math.random() * 3 + 1,
+                                radius: Math.random() * 4 + 2,
+                                color: ['#38bdf8', '#f43f5e', '#facc15', '#a855f7'][Math.floor(Math.random() * 4)],
+                                alpha: 1,
+                                decay: 0.04
+                            });
+                        }
+                    }
+                };
+
+                window.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        triggerSwim();
+                    }
+                });
+
+                this.canvas.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    triggerSwim();
+                });
+
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    triggerSwim();
+                }, { passive: false });
+
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    this.sound.init();
+                    this.startGame();
+                });
+
+                document.getElementById('restartBtn').addEventListener('click', () => {
+                    this.sound.init();
+                    this.startGame();
+                });
+
+                const soundBtn = document.getElementById('soundToggle');
+                const soundIcon = document.getElementById('soundIcon');
+                const soundLabel = document.getElementById('soundLabel');
+
+                soundBtn.addEventListener('click', () => {
+                    this.sound.enabled = !this.sound.enabled;
+                    if (this.sound.enabled) {
+                        soundIcon.className = "fa-solid fa-volume-high text-cyan-400 text-base";
+                        soundLabel.textContent = "SOUND ON";
+                    } else {
+                        soundIcon.className = "fa-solid fa-volume-xmark text-slate-500 text-base";
+                        soundLabel.textContent = "SOUND OFF";
+                    }
+                });
+            }
+
+            startGame() {
+                this.state = 'PLAYING';
+                this.score = 0;
+                this.mola.y = this.height / 2;
+                this.mola.velocity = 0;
+                this.mola.rotation = 0;
+                this.mines = [];
+                this.particles = [];
+                this.scorePopups = [];
+                this.spawnTimer = 0;
+
+                document.getElementById('startOverlay').classList.add('hidden');
+                document.getElementById('gameOverOverlay').classList.add('hidden');
+            }
+
+            gameOver() {
+                this.state = 'GAMEOVER';
+                this.sound.playExplosion();
+
+                // Sparkly explosion effect
+                for (let i = 0; i < 60; i++) {
+                    this.particles.push({
+                        x: this.mola.x + this.mola.width / 2,
+                        y: this.mola.y + this.mola.height / 2,
+                        vx: (Math.random() - 0.5) * 14,
+                        vy: (Math.random() - 0.5) * 14,
+                        radius: Math.random() * 6 + 2,
+                        color: ['#f43f5e', '#ec4899', '#38bdf8', '#facc15', '#a855f7'][Math.floor(Math.random() * 5)],
+                        alpha: 1,
+                        decay: Math.random() * 0.025 + 0.015
+                    });
+                }
+
+                if (this.score > this.highScore) {
+                    this.highScore = this.score;
+                    localStorage.setItem('swimmy_mola_vibrant_hs', this.highScore.toString());
+                }
+
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('bestScore').textContent = this.highScore;
+
+                setTimeout(() => {
+                    document.getElementById('gameOverOverlay').classList.remove('hidden');
+                }, 400);
+            }
+
+            spawnMinePair() {
+                const padding = 80;
+                const minTopHeight = padding;
+                const maxTopHeight = this.height - this.mineGap - padding;
+                const topMineHeight = Math.floor(Math.random() * (maxTopHeight - minTopHeight + 1)) + minTopHeight;
+
+                this.mines.push({
+                    x: this.width,
+                    topHeight: topMineHeight,
+                    bottomY: topMineHeight + this.mineGap,
+                    passed: false
+                });
+            }
+
+            update() {
+                // Bubbles movement
+                this.bubbles.forEach(b => {
+                    b.y -= b.speed;
+                    if (b.y < -10) {
+                        b.y = this.height + 10;
+                        b.x = Math.random() * this.width;
+                    }
+                });
+
+                // Particle update
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    let p = this.particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.alpha -= p.decay;
+                    if (p.alpha <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+
+                // Score popup floating text update
+                for (let i = this.scorePopups.length - 1; i >= 0; i--) {
+                    let sp = this.scorePopups[i];
+                    sp.y -= 1.5;
+                    sp.alpha -= 0.02;
+                    if (sp.alpha <= 0) {
+                        this.scorePopups.splice(i, 1);
+                    }
+                }
+
+                if (this.state !== 'PLAYING') return;
+
+                // Physics
+                this.mola.velocity += this.mola.gravity;
+                this.mola.y += this.mola.velocity;
+
+                // Rotates reverse/tilted because it's swimming backward!
+                this.mola.rotation = Math.min(Math.PI / 6, Math.max(-Math.PI / 6, this.mola.velocity * 0.05));
+
+                // Screen boundary collision
+                if (this.mola.y <= 0 || this.mola.y + this.mola.height >= this.height) {
+                    this.gameOver();
+                    return;
+                }
+
+                // Mine Spawning
+                this.spawnTimer++;
+                if (this.spawnTimer >= this.spawnInterval) {
+                    this.spawnTimer = 0;
+                    this.spawnMinePair();
+                }
+
+                // Update Mines
+                for (let i = this.mines.length - 1; i >= 0; i--) {
+                    let m = this.mines[i];
+                    m.x -= this.mineSpeed;
+
+                    // Score point
+                    if (!m.passed && m.x + this.mineWidth < this.mola.x) {
+                        m.passed = true;
+                        this.score++;
+                        this.sound.playScore();
+
+                        // Add score floating text
+                        this.scorePopups.push({
+                            x: this.mola.x + 20,
+                            y: this.mola.y - 10,
+                            text: '+1',
+                            alpha: 1
+                        });
+                    }
+
+                    // Collision detection
+                    const molaBox = {
+                        x: this.mola.x + 10,
+                        y: this.mola.y + 10,
+                        w: this.mola.width - 20,
+                        h: this.mola.height - 20
+                    };
+
+                    const topMineHit = molaBox.x < m.x + this.mineWidth &&
+                                       molaBox.x + molaBox.w > m.x &&
+                                       molaBox.y < m.topHeight;
+
+                    const bottomMineHit = molaBox.x < m.x + this.mineWidth &&
+                                          molaBox.x + molaBox.w > m.x &&
+                                          molaBox.y + molaBox.h > m.bottomY;
+
+                    if (topMineHit || bottomMineHit) {
+                        this.gameOver();
+                        return;
+                    }
+
+                    if (m.x + this.mineWidth < -100) {
+                        this.mines.splice(i, 1);
+                    }
+                }
+            }
+
+            drawEnvironment() {
+                // Vibrant Cyan-To-Indigo Gradient Background
+                const bgGrad = this.ctx.createLinearGradient(0, 0, 0, this.height);
+                bgGrad.addColorStop(0, '#0284c7');    // Bright sky blue top
+                bgGrad.addColorStop(0.35, '#0369a1'); // Cyan ocean
+                bgGrad.addColorStop(0.75, '#1e1b4b'); // Vibrant violet depth
+                bgGrad.addColorStop(1, '#0f172a');    // Deep navy bottom
+                this.ctx.fillStyle = bgGrad;
+                this.ctx.fillRect(0, 0, this.width, this.height);
+
+                // Colorful Coral Reef Silhouette on bottom
+                this.ctx.fillStyle = '#4c1d95';
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, this.height);
+                this.ctx.quadraticCurveTo(150, this.height - 50, 300, this.height);
+                this.ctx.quadraticCurveTo(450, this.height - 70, 600, this.height);
+                this.ctx.quadraticCurveTo(750, this.height - 40, this.width, this.height);
+                this.ctx.fill();
+
+                this.ctx.fillStyle = '#e11d48';
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, this.height);
+                this.ctx.quadraticCurveTo(200, this.height - 30, 400, this.height);
+                this.ctx.quadraticCurveTo(700, this.height - 50, this.width, this.height);
+                this.ctx.fill();
+
+                // Sunlight Caustic Light Beams
+                this.ctx.save();
+                this.ctx.globalCompositeOperation = 'screen';
+                const rayGrad = this.ctx.createLinearGradient(0, 0, 0, 400);
+                rayGrad.addColorStop(0, 'rgba(56, 189, 248, 0.35)');
+                rayGrad.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
+                this.ctx.fillStyle = rayGrad;
+
+                for (let i = 0; i < 6; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(60 + i * 160, 0);
+                    this.ctx.lineTo(140 + i * 160, 0);
+                    this.ctx.lineTo(80 + i * 180, 450);
+                    this.ctx.lineTo(20 + i * 180, 450);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                }
+                this.ctx.restore();
+
+                // Floating Glowing Bubbles
+                this.bubbles.forEach(b => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = b.opacity;
+                    this.ctx.fillStyle = b.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                });
+            }
+
+            drawMines() {
+                this.mines.forEach(m => {
+                    // Top Chain Link
+                    this.ctx.strokeStyle = '#c084fc';
+                    this.ctx.lineWidth = 5;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(m.x + this.mineWidth / 2, 0);
+                    this.ctx.lineTo(m.x + this.mineWidth / 2, m.topHeight - 20);
+                    this.ctx.stroke();
+
+                    // Top Mine Sprite
+                    this.ctx.drawImage(
+                        this.mineImg,
+                        m.x,
+                        m.topHeight - this.mineWidth,
+                        this.mineWidth,
+                        this.mineWidth
+                    );
+
+                    // Bottom Chain Link
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(m.x + this.mineWidth / 2, m.bottomY + 20);
+                    this.ctx.lineTo(m.x + this.mineWidth / 2, this.height);
+                    this.ctx.stroke();
+
+                    // Bottom Mine Sprite
+                    this.ctx.drawImage(
+                        this.mineImg,
+                        m.x,
+                        m.bottomY,
+                        this.mineWidth,
+                        this.mineWidth
+                    );
+                });
+            }
+
+            drawMolaMola() {
+                if (this.state === 'GAMEOVER') return;
+
+                this.ctx.save();
+                this.ctx.translate(this.mola.x + this.mola.width / 2, this.mola.y + this.mola.height / 2);
+                this.ctx.rotate(this.mola.rotation);
+
+                this.ctx.drawImage(
+                    this.molaImg,
+                    -this.mola.width / 2,
+                    -this.mola.height / 2,
+                    this.mola.width,
+                    this.mola.height
+                );
+
+                this.ctx.restore();
+            }
+
+            drawVFX() {
+                // Particles
+                this.particles.forEach(p => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = p.alpha;
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                });
+
+                // Floating Score Popups
+                this.scorePopups.forEach(sp => {
+                    this.ctx.save();
+                    this.ctx.globalAlpha = sp.alpha;
+                    this.ctx.font = 'bold 28px "Fredoka", sans-serif';
+                    this.ctx.fillStyle = '#facc15';
+                    this.ctx.shadowColor = '#f59e0b';
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.fillText(sp.text, sp.x, sp.y);
+                    this.ctx.restore();
+                });
+            }
+
+            drawHUD() {
+                if (this.state !== 'PLAYING') return;
+
+                // Main Score Counter
+                this.ctx.save();
+                this.ctx.font = '800 48px "Fredoka", cursive';
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.shadowColor = '#ec4899';
+                this.ctx.shadowBlur = 16;
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(this.score, this.width / 2, 75);
+                this.ctx.restore();
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+                this.drawEnvironment();
+                this.drawMines();
+                this.drawMolaMola();
+                this.drawVFX();
+                this.drawHUD();
+            }
+
+            updateUI() {
+                document.getElementById('bestScore').textContent = this.highScore;
+            }
+
+            loop(timestamp) {
+                const dt = timestamp - this.lastTime;
+                this.lastTime = timestamp;
+                if (dt > 0) {
+                    this.fps = Math.round(1000 / dt);
+                    document.getElementById('fpsCounter').textContent = `${this.fps} FPS`;
+                }
+
+                this.update();
+                this.draw();
+                requestAnimationFrame(this.loop.bind(this));
+            }
+        }
+
+        window.addEventListener('load', () => {
+            new SwimmyFishGame();
+        });
+    </script>
+</body>
+</html>
